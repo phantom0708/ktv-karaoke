@@ -1,0 +1,17 @@
+{
+  "name": "ktv",
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "description": "KTV — phòng hát karaoke 3D online",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test test/*.test.js",
+    "cert": "sh scripts/make-cert.sh",
+    "coins": "node scripts/admin.mjs coins",
+    "admin": "node scripts/admin.mjs admin"
+  },
+  "dependencies": {
+    "ws": "8.18.0"
+  }
+}

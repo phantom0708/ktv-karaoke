@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>KTV — Karaoke lounge 3D</title>
+  <meta name="description" content="Phòng karaoke 3D online: chọn bài YouTube, cầm mic, hát cùng bạn bè, kiếm xu và làm nhiệm vụ.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="KTV — Hát karaoke 3D cùng bạn bè">
+  <meta property="og:description" content="Vào lounge karaoke 3D: chọn bài YouTube, cầm mic, hát cùng mọi người. Đăng ký qua link mời được tặng xu!">
+  <meta property="og:image" content="{{ORIGIN}}/og.png">
+  <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script type="importmap">
+    { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    } }
+  </script>
+</head>
+<body>
+  <!-- ============ WAITING ROOM (server full) ============ -->
+  <section id="s-wait" class="screen">
+    <div class="auth-bg"><div class="sun"></div><div class="skyline"></div></div>
+    <div class="auth-wrap">
+      <h1 class="logo">K<span>TV</span></h1>
+      <div class="auth-card wait-card">
+        <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <h2 id="wait-title" data-i18n="waitTitle"></h2>
+        <div id="wait-queue">
+          <p class="muted center" data-i18n="waitYour"></p>
+          <div class="wait-pos">#<b id="wait-pos">1</b></div>
+          <p class="muted center" id="wait-of"></p>
+        </div>
+        <div id="wait-full" class="hidden">
+          <p class="center" data-i18n="waitFullText"></p>
+          <div class="wait-pos small"><b id="wait-retry">30</b>s</div>
+        </div>
+        <div class="wait-meter"><div id="wait-bar"></div></div>
+        <p class="center wait-online" id="wait-online"></p>
+        <p class="hint center" id="wait-tip"></p>
+        <button class="btn" id="btn-wait-leave" data-i18n="waitLeave"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ AUTH ============ -->
+  <section id="s-auth" class="screen">
+    <div class="auth-bg"><div class="sun"></div><div class="skyline"></div></div>
+    <div class="auth-wrap">
+      <h1 class="logo">K<span>TV</span></h1>
+      <p class="tagline" data-i18n="tagline"></p>
+      <div id="auth-choose" class="auth-card">
+        <button class="btn primary xl" id="btn-guest"><span data-i18n="playGuest"></span><small data-i18n="playGuestHint"></small></button>
+        <button class="btn xl" id="btn-show-login"><span>🔑 <span data-i18n="login"></span></span></button>
+        <button class="btn xl" id="btn-show-register"><span>✨ <span data-i18n="register"></span></span><small data-i18n="registerHint"></small></button>
+      </div>
+      <form id="auth-login" class="auth-card hidden">
+        <h2 data-i18n="login"></h2>
+        <label><span data-i18n="username"></span><input name="username" autocomplete="username" required></label>
+        <label><span data-i18n="password"></span><input name="password" type="password" autocomplete="current-password" required></label>
+        <p class="form-error"></p>
+        <button class="btn primary" type="submit" data-i18n="login"></button>
+        <button class="btn link" type="button" data-goto="register" data-i18n="noAccount"></button>
+        <button class="btn link" type="button" data-goto="choose" data-i18n="back"></button>
+      </form>
+      <form id="auth-register" class="auth-card hidden">
+        <h2 data-i18n="register"></h2>
+        <label><span data-i18n="username"></span><input name="username" autocomplete="username" required pattern="[A-Za-z0-9_.]{3,20}"></label>
+        <label><span data-i18n="password"></span><input name="password" type="password" autocomplete="new-password" required minlength="6"></label>
+        <label><span data-i18n="displayName"></span><input name="name" maxlength="24"></label>
+        <p class="form-error"></p>
+        <button class="btn primary" type="submit" data-i18n="register"></button>
+        <button class="btn link" type="button" data-goto="login" data-i18n="haveAccount"></button>
+        <button class="btn link" type="button" data-goto="choose" data-i18n="back"></button>
+      </form>
+    </div>
+    <button class="btn lang-btn" data-action="lang"></button>
+  </section>
+
+  <!-- ============ CHARACTER CREATOR ============ -->
+  <section id="s-creator" class="screen">
+    <div class="creator">
+      <div class="creator-stage">
+        <canvas id="creator-canvas"></canvas>
+        <p class="hint" data-i18n="dragToRotate"></p>
+        <div class="row center"><button class="btn" id="cr-random" data-i18n="random"></button><button class="btn" id="cr-reset" data-i18n="reset"></button></div>
+      </div>
+      <div class="creator-panel card">
+        <h2 data-i18n="creatorTitle"></h2>
+        <label id="cr-name-wrap"><span data-i18n="displayName"></span><input id="cr-name" maxlength="24" placeholder="Ca sĩ phòng tắm"></label>
+        <div class="tabs" id="cr-tabs"></div>
+        <div id="cr-options" class="cr-options"></div>
+        <div class="row end"><button class="btn" id="cr-cancel" data-i18n="back"></button><button class="btn primary" id="cr-save" data-i18n="save"></button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ GAME (lobby + rooms) ============ -->
+  <section id="s-game" class="screen">
+    <div id="video-wrap"><div id="yt-player"></div><div id="video-idle" class="video-idle"></div></div>
+    <canvas id="game-canvas"></canvas>
+    <div id="labels"></div>
+    <div id="controls-hint" class="controls-hint"></div>
+
+    <header class="hud-top">
+      <div class="hud-left card glass">
+        <strong id="place-name">KTV</strong>
+        <span id="place-sub" class="muted"></span>
+        <span id="host-badge" class="badge hidden" data-i18n="host"></span>
+      </div>
+      <div class="hud-right">
+        <span class="coins card glass" id="coins" title="Xu">🪙 0</span>
+        <button class="btn icon menu-btn" data-action="menu" aria-label="Menu">☰</button>
+        <div class="menu-sheet" id="menu-sheet">
+        <span id="lobby-buttons" class="row">
+          <button class="btn" data-action="reception" data-i18n="reception"></button>
+          <button class="btn" data-action="quests" data-i18n="questsBtn"></button>
+          <button class="btn icon" data-action="photo" data-i18n-title="photoBtn">📸</button>
+          <button class="btn icon" data-action="share" data-i18n-title="shareBtn">📤</button>
+          <button class="btn" data-action="friends" data-i18n="friendsBtn"></button>
+          <button class="btn" data-action="club" data-i18n="clubBtn"></button>
+          <button class="btn" data-action="character" data-i18n="character"></button>
+          <button class="btn" data-action="wardrobe" data-i18n="wardrobe"></button>
+          <button class="btn" data-action="shop" data-i18n="shop"></button>
+          <button class="btn hidden" data-action="admin" id="btn-admin" data-i18n="adminBtn"></button>
+        </span>
+        <span id="room-buttons" class="row hidden">
+          <button class="btn icon" data-action="cinema" id="btn-cinema" data-i18n-title="cinema">🎬</button>
+          <button class="btn icon" data-action="character" data-i18n-title="character">👕</button>
+          <button class="btn icon" data-action="songs-panel" data-i18n-title="songs">📋</button>
+          <button class="btn icon" data-action="quests" data-i18n-title="questsBtn">🎯</button>
+          <button class="btn icon" data-action="photo" data-i18n-title="photoBtn">📸</button>
+          <button class="btn icon" data-action="share" data-i18n-title="shareBtn">📤</button>
+          <button class="btn icon" data-action="friends" data-i18n-title="friendsBtn">💛</button>
+          <button class="btn icon" data-action="club" data-i18n-title="clubBtn">👥</button>
+          <button class="btn icon" data-action="recordings" data-i18n-title="recTitle">🎙️</button>
+          <button class="btn danger" data-action="leave" data-i18n="leave"></button>
+        </span>
+        <button class="btn" data-action="gfx" id="btn-gfx"></button>
+        <button class="btn icon" data-action="lang" data-i18n-title="langBtn"></button>
+        <button class="btn icon" data-action="logout" data-i18n-title="logoutBtn">⎋</button>
+        </div>
+      </div>
+    </header>
+
+    <aside id="room-panel" class="room-panel hidden">
+      <div class="panel-head">
+        <strong data-i18n="songs"></strong>
+        <span id="panel-mini" class="panel-mini"></span>
+        <button class="panel-toggle" id="btn-collapse" data-action="panel-collapse" aria-expanded="true">▾</button>
+      </div>
+      <div class="panel-content">
+      <section>
+        <h3 data-i18n="nowPlaying"></h3>
+        <div id="np" class="np"></div>
+        <div class="progress"><div id="np-bar"></div></div>
+        <div class="row small-gap" id="np-controls">
+          <button class="btn sm" id="btn-pause"></button>
+          <button class="btn sm" id="btn-skip" data-i18n="skip"></button>
+          <button class="btn sm" id="btn-duet" data-i18n="duetInvite"></button>
+        </div>
+      </section>
+      <section class="grow">
+        <h3 id="queue-title"></h3>
+        <ol id="queue" class="queue"></ol>
+      </section>
+      <p class="hint" id="room-hint"></p>
+      </div>
+    </aside>
+
+    <button id="btn-unmute" class="btn primary unmute hidden">🔊 Bấm để nghe nhạc / Tap to play</button>
+    <div class="center-stack">
+      <button id="mic-banner" class="mic-banner hidden" data-action="mic"></button>
+      <div id="held-bar" class="held-bar card hidden"><span id="held-text"></span><button class="btn sm" data-action="drink" id="btn-drink"></button><button class="btn sm" data-action="cheers" data-i18n="cheers"></button><button class="btn sm" data-action="drop" data-i18n="drop"></button></div>
+      <div id="prompt" class="prompt hidden"></div>
+    </div>
+    <ul id="chat-log" class="chat-log"></ul>
+
+    <div id="joystick" class="joystick" aria-hidden="true"><i></i></div>
+    <div id="lookstick" class="joystick look" aria-hidden="true"><b>👁</b><i></i></div>
+    <footer class="hud-bottom">
+      <div class="tray" id="tray">
+      <div class="row small-gap room-only">
+        <button class="emo" data-react="clap">👏</button><button class="emo" data-react="heart">❤️</button><button class="emo" data-react="fire">🔥</button>
+        <button class="emo" data-react="laugh">😂</button><button class="emo" data-react="star">⭐</button><button class="emo" data-react="cheers">🍻</button>
+      </div>
+      <div class="row small-gap">
+        <button class="emo" data-emote="dance" title="Dance">💃</button><button class="emo" data-emote="wave" title="Wave">👋</button>
+        <button class="emo room-only" data-action="table" title="Table">🍽️</button><button class="emo room-only" data-action="staff" title="Waiter">🛎️</button><button class="emo room-only" data-action="kiosk" title="Songs">🎵</button><button class="emo room-only" data-action="panel" title="Effects">🎛️</button>
+      </div>
+      <div class="row small-gap tray-tools">
+        <button class="btn room-only" id="btn-hp" data-action="headphones">🎧</button>
+        <button class="btn room-only" data-action="audio">⚙️</button>
+        <button class="btn room-only" data-action="recordings" data-i18n-title="recTitle">🎙️</button>
+        <button class="btn room-only tabrec hidden" id="btn-tabrec" data-action="tabrec" data-i18n-title="tabRecHint"></button>
+      </div>
+      </div>
+      <form id="chat-form" class="chat-form"><input id="chat-input" maxlength="200" autocomplete="off"><button class="btn sm" type="submit" data-i18n="send"></button></form>
+      <button class="btn room-only mic-btn" id="btn-mic" data-action="mic"><span id="mic-label"></span><span class="meter"><i id="mic-meter"></i></span></button>
+      <div class="touch-pad">
+        <button class="btn round" data-action="chat-toggle" aria-label="Chat">💬</button>
+        <button class="btn round" data-action="tray-toggle" aria-label="More">😊</button>
+      </div>
+    </footer>
+    <div id="toasts" class="toasts"></div>
+  </section>
+
+  <!-- ============ DIALOGS ============ -->
+  <dialog id="dlg-reception" class="dlg wide">
+    <header><div><strong data-i18n="receptionist"></strong><p id="rec-greeting" class="muted"></p></div><button class="btn icon" data-close>✕</button></header>
+    <nav class="tabs" id="rec-tabs"></nav>
+    <div id="rec-body" class="dlg-body"></div>
+  </dialog>
+
+  <dialog id="dlg-kiosk" class="dlg wide kiosk">
+    <header><strong data-i18n="kioskTitle"></strong><span class="muted" id="kiosk-clock"></span><button class="btn icon" data-close>✕</button></header>
+    <nav class="genres" id="kiosk-genres"></nav>
+    <form id="kiosk-form" class="row"><input id="kiosk-input" autocomplete="off"><button class="btn primary" id="kiosk-go" type="submit"></button></form>
+    <p id="kiosk-link" class="hint hidden" data-i18n="linkReady"></p>
+    <div class="row small-gap" id="kiosk-tone"></div>
+    <div id="kiosk-results" class="results"></div>
+    <button class="btn sm hidden" id="kiosk-more" data-i18n="loadMore"></button>
+  </dialog>
+
+  <dialog id="dlg-table" class="dlg"><header><strong data-i18n="tableTitle"></strong><button class="btn icon" data-close>✕</button></header><div id="table-body" class="dlg-body"></div></dialog>
+  <dialog id="dlg-staff" class="dlg"><header><div><strong data-i18n="staffTitle"></strong><p id="staff-greeting" class="muted"></p></div><button class="btn icon" data-close>✕</button></header><div id="staff-body" class="dlg-body"></div></dialog>
+  <dialog id="dlg-panel" class="dlg"><header><strong data-i18n="panelTitle"></strong><button class="btn icon" data-close>✕</button></header><div id="panel-body" class="switches"></div></dialog>
+  <dialog id="dlg-audio" class="dlg"><header><strong data-i18n="audioTitle"></strong><button class="btn icon" data-close>✕</button></header><div id="audio-body" class="dlg-body"></div></dialog>
+  <dialog id="dlg-duet" class="dlg"><header><strong data-i18n="duetInvite"></strong><button class="btn icon" data-close>✕</button></header><ul id="duet-list" class="plain-list"></ul></dialog>
+  <dialog id="dlg-admin" class="dlg">
+    <header><strong data-i18n="adminTitle"></strong><button class="btn icon" data-close>✕</button></header>
+    <form id="admin-form" class="dlg-body">
+      <label><span data-i18n="username"></span><input name="username" required autocomplete="off"></label>
+      <label><span data-i18n="adminAmount"></span><input name="amount" type="number" step="1" value="1000" required></label>
+      <div class="row small-gap"><button type="button" class="btn sm" data-amt="100">+100</button><button type="button" class="btn sm" data-amt="1000">+1.000</button><button type="button" class="btn sm" data-amt="10000">+10.000</button><button type="button" class="btn sm" data-amt="-100">−100</button></div>
+      <p class="hint" data-i18n="adminHint"></p>
+      <button class="btn primary" type="submit" data-i18n="adminGive"></button>
+    </form>
+    <div id="admin-rooms" class="dlg-body"></div>
+  </dialog>
+  <dialog id="dlg-proom" class="dlg">
+    <header><strong data-i18n="proomAskTitle"></strong><button class="btn icon" data-close>✕</button></header>
+    <form id="proom-form" class="dlg-body">
+      <label><span data-i18n="proomName"></span><input name="name" required minlength="3" maxlength="30" autocomplete="off"></label>
+      <label><span data-i18n="proomCap"></span><input name="capacity" type="number" min="2" max="40" step="1" value="20" required></label>
+      <label><span data-i18n="proomBlurb"></span><input name="blurb" maxlength="60" autocomplete="off"></label>
+      <p class="hint" data-i18n="proomAskHint"></p>
+      <button class="btn primary" type="submit" data-i18n="proomSend"></button>
+    </form>
+  </dialog>
+  <dialog id="dlg-code" class="dlg">
+    <header><strong data-i18n="proomEnterTitle"></strong><button class="btn icon" data-close>✕</button></header>
+    <form id="code-form" class="dlg-body">
+      <p id="code-hint" class="muted"></p>
+      <input name="code" required maxlength="6" autocomplete="off" class="code-input" placeholder="ABC123">
+      <p id="code-wrong" class="hint err hidden" data-i18n="proomWrong"></p>
+      <button class="btn primary" type="submit" data-i18n="proomEnter"></button>
+    </form>
+  </dialog>
+  <dialog id="dlg-recs" class="dlg"><header><div><strong data-i18n="recTitle"></strong><p class="muted" data-i18n="recHint"></p></div><button class="btn icon" data-close>✕</button></header><div id="tabrec-box" class="tabrec-box hidden"></div><ul id="rec-list" class="dlg-body plain-list"></ul></dialog>
+  <dialog id="dlg-share" class="dlg"><header><strong data-i18n="shareTitle"></strong><button class="btn icon" data-close>✕</button></header><div id="share-body" class="dlg-body"></div></dialog>
+  <dialog id="dlg-player" class="dlg"><header><strong data-i18n="pcTitle"></strong><button class="btn icon" data-close>✕</button></header><div id="pc-body" class="dlg-body"></div></dialog>
+  <dialog id="dlg-confirm" class="dlg"><p id="confirm-text"></p><div class="row end"><button class="btn" id="confirm-no"></button><button class="btn primary" id="confirm-yes"></button></div></dialog>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>
